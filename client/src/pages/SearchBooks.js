@@ -1,8 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import { Jumbotron, Container, Col, Form, Button, Card, CardColumns } from 'react-bootstrap';
+import { 
+  Jumbotron, 
+  Container, 
+  Col, 
+  Form, 
+  Button, 
+  Card, 
+  CardColumns 
+} from 'react-bootstrap';
 
 import Auth from '../utils/auth';
-import { saveBook, searchGoogleBooks } from '../utils/API';
+import { useMutation } from "@apollo/client";
+import { searchGoogleBooks } from '../utils/API';
+import { SAVE_BOOK } from "../utils/mutations";
 import { saveBookIds, getSavedBookIds } from '../utils/localStorage';
 
 const SearchBooks = () => {
@@ -10,7 +20,6 @@ const SearchBooks = () => {
   const [searchedBooks, setSearchedBooks] = useState([]);
   // create state for holding our search field data
   const [searchInput, setSearchInput] = useState('');
-
   // create state to hold saved bookId values
   const [savedBookIds, setSavedBookIds] = useState(getSavedBookIds());
 
@@ -52,6 +61,7 @@ const SearchBooks = () => {
     }
   };
 
+  const [saveBook, { data, loading }] = useMutation(SAVE_BOOK);
   // create function to handle saving a book to our database
   const handleSaveBook = async (bookId) => {
     // find the book in `searchedBooks` state by the matching id
@@ -65,12 +75,12 @@ const SearchBooks = () => {
     }
 
     try {
-      const response = await saveBook(bookToSave, token);
+      // const response = await saveBook(bookToSave, token);
 
-      if (!response.ok) {
-        throw new Error('something went wrong!');
-      }
-
+      // if (!response.ok) {
+      //   throw new Error('something went wrong!');
+      // }
+      await saveBook({ variables: { input: bookToSave }});
       // if book successfully saves to user's account, save book id to state
       setSavedBookIds([...savedBookIds, bookToSave.bookId]);
     } catch (err) {
@@ -80,7 +90,10 @@ const SearchBooks = () => {
 
   return (
     <>
-      <Jumbotron fluid className='text-light bg-dark'>
+      <Jumbotron 
+        fluid 
+        className='text-light bg-dark'
+      >
         <Container>
           <h1>Search for Books!</h1>
           <Form onSubmit={handleFormSubmit}>
@@ -96,7 +109,11 @@ const SearchBooks = () => {
                 />
               </Col>
               <Col xs={12} md={4}>
-                <Button type='submit' variant='success' size='lg'>
+                <Button 
+                  type='submit' 
+                  variant='success' 
+                  size='lg'
+                >
                   Submit Search
                 </Button>
               </Col>
@@ -116,7 +133,11 @@ const SearchBooks = () => {
             return (
               <Card key={book.bookId} border='dark'>
                 {book.image ? (
-                  <Card.Img src={book.image} alt={`The cover for ${book.title}`} variant='top' />
+                  <Card.Img 
+                    src={book.image} 
+                    alt={`The cover for ${book.title}`} 
+                    variant='top' 
+                  />
                 ) : null}
                 <Card.Body>
                   <Card.Title>{book.title}</Card.Title>

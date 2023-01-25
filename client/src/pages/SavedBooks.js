@@ -50,7 +50,7 @@ const SavedBooks = () => {
   // Use mutation to use the removeBook function
   const [removeBook] = useMutation(REMOVE_BOOK);
 
-  const userData = data?.me || [];
+  const userData = data?.getMe || [];
 
   // create function that accepts the book's mongo _id value as param and deletes the book from the database
   const handleDeleteBook = async (bookId) => {
@@ -112,8 +112,8 @@ const SavedBooks = () => {
                     src={book.image} 
                     alt={`The cover for ${book.title}`} 
                     variant='top' 
-                  />) 
-                : null}
+                  />
+                ) : null}
                 <Card.Body>
                   <Card.Title>
                     {book.title}
