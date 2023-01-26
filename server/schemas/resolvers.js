@@ -16,6 +16,7 @@ const resolvers = {
       return await User.findById(context.user._id).populate("books");
     },
   },
+  
   Mutation: {
     login: async (parent, { email, password }) => {
       // Check if the email exists in the db
@@ -34,6 +35,40 @@ const resolvers = {
       return { token, user };
     },
 
-    
-  }
-}
+    addUser: async (parent, { username, email, password }) => {
+      // Create a user and generate a token
+      const user = await User.create({ username, email, password });
+      const token = signToken(user);
+      // After log in, server returns the new token
+      return { token, user };
+    },
+
+    // Save book to user
+    saveBook: async (parent, args, context) => {
+      if (!context.user) {
+        throw new AuthenticationError("Please Login first.");
+      }
+      const updateBook = await User.findOneAndUpdate(
+        { _id: context.user._id },
+        { $addToSet: { savedBooks: args.input } },
+        { new: true }
+      );
+      return updateBook;
+    },
+
+    // Remove the book if bookId matches arg.bookId
+    removeBook: async (parent, args, context) => {
+      if (!context.user) {
+        throw new AuthenticationError("Please Login first.");
+      }
+      const updateBook = await User.findOneAndUpdate(
+        { _id: context.user._id },
+        { $pull: { savedBooks: { bookId: args.bookId } } },
+        { new: true }
+      );
+      return updateBook;
+    },
+  },
+};
+
+module.exports = resolvers;
